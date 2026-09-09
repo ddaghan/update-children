@@ -71,9 +71,14 @@ export function updateChildren(node, newChildNodes = []) {
                 --remainingOldNodes;
                 continue;
             } else if (remainingNewNodes > remainingOldNodes) {                
-                oldChildNode.after(newChildNode);
+                oldChildNode.before(newChildNode);
                 //console.log('within node', node, 'added', newChildNode.textcontent, newChildNode);
-                ++newNodeIndex;
+                if (newChildNodes.map) {
+                    // if newChildNodes is an array, we must advance the index for the next iteration.
+                    // if newChildNodes is a NodeList, oldChildNode.before(newChildNode) removes the newChildNode from newChildNodes,
+                    // so we must not advance the index.
+                    ++newNodeIndex;
+                }
                 --remainingNewNodes;
                 continue;
             } else {
