@@ -1,0 +1,30 @@
+{
+  "name": "update-children",
+  "version": "1.0.0",
+  "description": "An intelligent alternative to Element.replaceChildren() which does not replace child nodes if they did not change (reconciliation).",
+  "keywords": [
+    "replaceChildren",
+    "updateChildren",
+    "reconciliation",
+    "dom"
+  ],
+  "homepage": "https://github.com/ddaghan/update-children#readme",
+  "bugs": {
+    "url": "https://github.com/ddaghan/update-children/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddaghan/update-children.git"
+  },
+  "license": "ISC",
+  "author": "Daghan Dinc",
+  "type": "module",
+  "main": "updateChildren.js",
+  "scripts": {
+    "build": "rolldown src/updateChildren.js --file updateChildren.js --minify=true",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "rolldown": "^1.2.8"
+  }
+}
