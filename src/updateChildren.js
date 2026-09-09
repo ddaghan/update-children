@@ -103,7 +103,12 @@ export function updateChildren(node, newChildNodes = []) {
                 oldChildNode.before(newChildNode);
                 //console.log('textContent heuristic: within node', node, 'added', newChildNode.textContent, newChildNode);
                 ++oldNodeIndex;
-                ++newNodeIndex;
+                if (newChildNodes.map) {
+                    // if newChildNodes is an array, we must advance the index for the next iteration.
+                    // if newChildNodes is a NodeList, oldChildNode.before(newChildNode) removes the newChildNode from newChildNodes,
+                    // so we must not advance the index.
+                    ++newNodeIndex;
+                }
                 --remainingNewNodes;
                 continue;
             } else {
