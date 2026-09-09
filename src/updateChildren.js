@@ -1,22 +1,5 @@
-const allEvents = ["onabort","onanimationcancel","onanimationend","onanimationiteration","onanimationstart","onauxclick",
-    "onbeforecopy","onbeforecut","onbeforeinput","onbeforematch","onbeforepaste","onbeforetoggle","onbeforexrselect",
-    "onblur","oncancel","oncanplay","oncanplaythrough","onchange","onclick","onclose","oncommand",
-    "oncontentvisibilityautostatechange","oncontextlost","oncontextmenu","oncontextrestored","oncopy","oncuechange",
-    "oncut","ondblclick","ondrag","ondragend","ondragenter","ondragleave","ondragover","ondragstart","ondrop",
-    "ondurationchange","onemptied","onended","onerror","onfocus","onformdata","onfullscreenchange","onfullscreenerror",
-    "ongotpointercapture","oninput","oninvalid","onkeydown","onkeypress","onkeyup","onload","onloadeddata",
-    "onloadedmetadata","onloadstart","onlostpointercapture","onmousedown","onmouseenter","undefined","onmouseleave",
-    "undefined","onmousemove","onmouseout","onmouseover","onmouseup","onmousewheel","onpaste","onpause","onplay",
-    "onplaying","onpointercancel","onpointerdown","onpointerenter","onpointerleave","onpointermove","onpointerout",
-    "onpointerover","onpointerrawupdate","onpointerup","onprogress","onratechange","onreset","onresize","onscroll",
-    "onscrollend","onscrollsnapchange","onscrollsnapchanging","onsearch","onsecuritypolicyviolation","onseeked",
-    "onseeking","onselect","onselectionchange","onselectstart","onslotchange","onstalled","onsubmit","onsuspend",
-    "ontimeupdate","ontoggle","ontransitioncancel","ontransitionend","ontransitionrun","ontransitionstart",
-    "onvolumechange","onwaiting","onwebkitanimationend","onwebkitanimationiteration","onwebkitanimationstart",
-    "onwebkitfullscreenchange","onwebkitfullscreenerror","onwebkittransitionend","onwheel"];
+const allEvents = Object.keys(document.__proto__.__proto__).filter(s => s.startsWith('on'));
 
-
-// TODO: record last opened list, open with it if exists, otherwise create new.
 export function updateChildren(node, newChildNodes = []) {
     //console.log('update children called for node:',node, 'newChildNodes', newChildNodes);
     let remainingOldNodes = node.childNodes.length;
