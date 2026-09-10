@@ -1,4 +1,4 @@
-# A very small (155 bytes) uuidv7 generator
+# An intelligent alternative to Element.replaceChildren() which does not replace child nodes if they did not change (reconciliation).
 
 ## Install
 
