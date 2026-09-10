@@ -1,4 +1,8 @@
-# An intelligent alternative to Element.replaceChildren() which does not replace child nodes if they did not change (reconciliation).
+# An intelligent alternative to Element.replaceChildren()
+
+```updateChildren()``` method does not replace child nodes if they did not change (i.e. reconciliation).
+
+This keeps the focus, and does minimum DOM updates.
 
 ## Install
 
@@ -36,6 +40,8 @@ updateChildren(container, [
     newChildButton, // It does not replace the button, and keeps the text content. Only updates onclick
 ]);
 
+// Update children with our method again
+// It only updates DOM elements and attributes when necessary.
 const newNewChildButton = document.createElement('button');
 newNewChildButton.appendChild(document.createTextNode('click me'));
 newNewChildButton.onclick = () => alert(2);
