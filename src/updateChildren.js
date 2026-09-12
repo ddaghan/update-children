@@ -1,28 +1,30 @@
 const allEvents = Object.keys(document.__proto__.__proto__).filter(s => s.startsWith('on'));
 
 export function updateChildren(node, newChildNodes = []) {
-    //console.log('update children called for node:',node, 'newChildNodes', newChildNodes);
     let remainingOldNodes = node.childNodes.length;
     let remainingNewNodes = newChildNodes.length;
     let oldNodeIndex = 0;
     let newNodeIndex = 0;
+    // newChildNodes is an array or nodeList. When we insert an item from it, array does not change but nodeList loses that element.
+    // We must increment newNodeIndex for array, but not for nodeList in case of insertions or replaces.
+    const isNewNodesArray = Array.isArray(newChildNodes);
     for (;;) {
         if (remainingOldNodes === 0 && remainingNewNodes === 0) {
             break;
         }
-        //console.log('updating children', 'node', node, 'oldNodeIndex', oldNodeIndex, 'newNodeIndex', newNodeIndex, 'remainingOldNodes', remainingOldNodes, 'remainingNewNodes', remainingNewNodes );
         if (remainingOldNodes === 0) {
             const frag = document.createDocumentFragment();
-            for (let i = newNodeIndex; i < newChildNodes.length; ++i) {                
+            for (let i = newNodeIndex; i < newChildNodes.length; ) {
                 frag.appendChild(newChildNodes[i]);
-                //console.log('within node', node, 'appended', newChildNodes[i]);
+                if (isNewNodesArray) {
+                    ++i;
+                }
             }
             node.appendChild(frag);
             break;
         }
         if (remainingNewNodes === 0) {
             while (remainingOldNodes--) {
-                //console.log('within node', node, 'removing', node.lastChild);
                 node.removeChild(node.lastChild);
             }
             break;
@@ -34,12 +36,15 @@ export function updateChildren(node, newChildNodes = []) {
         const isNewChildNodeText = newChildNode.nodeType === 3;
 
         if (isOldChildNodeText && isNewChildNodeText) {
+            let isReplaced = false;
             if (oldChildNode.textContent  !== newChildNode.textContent) {                
                 oldChildNode.replaceWith(newChildNode);
-                //console.log('within node', node, 'replaced text node', oldChildNode, 'with', newChildNode);
+                isReplaced = true;
             }
             ++oldNodeIndex;
-            ++newNodeIndex;
+            if (isNewNodesArray && isReplaced) {
+                ++newNodeIndex;
+            }
             --remainingOldNodes;
             --remainingNewNodes;
             continue;
@@ -49,26 +54,22 @@ export function updateChildren(node, newChildNodes = []) {
             oldChildNode.tagName !== newChildNode.tagName) {
              if (remainingOldNodes > remainingNewNodes) {
                 oldChildNode.remove();
-                //console.log('within node', node, 'removed', oldChildNode.textContent, oldChildNode);
                 --remainingOldNodes;
                 continue;
             } else if (remainingNewNodes > remainingOldNodes) {                
                 oldChildNode.before(newChildNode);
-                //console.log('within node', node, 'added', newChildNode.textcontent, newChildNode);
                 ++oldNodeIndex;
-                if (newChildNodes.map) {
-                    // if newChildNodes is an array, we must advance the index for the next iteration.
-                    // if newChildNodes is a NodeList, oldChildNode.before(newChildNode) removes the newChildNode from newChildNodes,
-                    // so we must not advance the index.
+                if (isNewNodesArray) {
                     ++newNodeIndex;
                 }
                 --remainingNewNodes;
                 continue;
             } else {
                 oldChildNode.replaceWith(newChildNode);
-                //console.log('within node', node, 'replaced', oldChildNode.textContent, oldChildNode, 'with', newChildNode.textContent, newChildNode);
                 ++oldNodeIndex;
-                ++newNodeIndex;
+                if (isNewNodesArray) {
+                    ++newNodeIndex;
+                }
                 --remainingOldNodes;
                 --remainingNewNodes;
                 continue;
@@ -77,24 +78,14 @@ export function updateChildren(node, newChildNodes = []) {
 
         // textContent heuristic:
         if (oldChildNode.textContent !== newChildNode.textContent && remainingOldNodes !== remainingNewNodes) {
-            //  console.log('within node', node, 'text content heuristic', 
-            //     'oldChildNode.textContent', oldChildNode.textContent,
-            //     'newChildNode.textContent', newChildNode.textContent,
-            //     'remainingOldNodes', remainingOldNodes,
-            //     'remainingNewNodes', remainingNewNodes);
             if (remainingOldNodes > remainingNewNodes) {
                 oldChildNode.remove();
-                //console.log('textContent heuristic: within node', node, 'removed', oldChildNode.textContent, oldChildNode);
                 --remainingOldNodes;
                 continue;
             } else if (remainingNewNodes > remainingOldNodes) {
                 oldChildNode.before(newChildNode);
-                //console.log('textContent heuristic: within node', node, 'added', newChildNode.textContent, newChildNode);
                 ++oldNodeIndex;
-                if (newChildNodes.map) {
-                    // if newChildNodes is an array, we must advance the index for the next iteration.
-                    // if newChildNodes is a NodeList, oldChildNode.before(newChildNode) removes the newChildNode from newChildNodes,
-                    // so we must not advance the index.
+                if (isNewNodesArray) {
                     ++newNodeIndex;
                 }
                 --remainingNewNodes;
@@ -113,21 +104,17 @@ export function updateChildren(node, newChildNodes = []) {
                 const newAttrValue = newAttributes[oldAttrName].value;
                 if (newAttrValue != oldAttrValue) {
                     oldChildNode.setAttribute(oldAttrName, newAttrValue);
-                    //console.log('node', node, 'child node', oldChildNode, 'updated attribute', oldAttrName, 'to', newAttrValue);
                     continue;
                 }
             } else {
                 oldChildNode.removeAttribute(oldAttrName);
-                //console.log('node', node, 'child node', oldChildNode, 'removed attribute', oldAttrName);
             }
         }
         for (const newAttr of newAttributes) {
             const newAttrName = newAttr.name;
             const newAttrValue = newAttr.value;
             if (!oldAttributes[newAttrName]) {
-                //console.log('adding attribute', newAttrName, newAttrValue);
                 oldChildNode.setAttribute(newAttrName, newAttrValue);
-                //console.log('node', node, 'child node', oldChildNode, 'added attribute', newAttrName, 'as', newAttrValue);
             }
         }
 
@@ -135,17 +122,9 @@ export function updateChildren(node, newChildNodes = []) {
             const oldEventHandler = oldChildNode[eventName] || '';
             const newEventHandler = newChildNode[eventName] || '';
             if (oldEventHandler !== newEventHandler && oldEventHandler.toString() !== newEventHandler.toString()) {
-                if (oldEventHandler.toString()) {
-                    //console.log('oldEventHandler.toString()', oldEventHandler.toString());
-                }
-                if (newEventHandler.toString()) {
-                    //console.log('newEventHandler.toString()', newEventHandler.toString());
-                }
                 oldChildNode[eventName] = newEventHandler;
-                //console.log('node', node, 'child node', oldChildNode, 'added/updated event handler for', eventName, 'with', newEventHandler);
             }
         });
-        // console.log('node', node, 'checked attributes of', oldChildNode);
         updateChildren(oldChildNode, newChildNode.childNodes);
         ++oldNodeIndex;
         ++newNodeIndex;
